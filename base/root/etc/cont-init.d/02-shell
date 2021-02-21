@@ -1,0 +1,100 @@
+#!/usr/bin/with-contenv bash
+
+USERNAME=${USERNAME:-"eyhn"}
+
+if [ "${USERNAME}" = "root" ]; then 
+    USER_RC_PATH="/root"
+else
+    USER_RC_PATH="/home/${USERNAME}"
+fi
+
+
+CODESPACES_BASH="$(cat \
+<<EOF
+#!/usr/bin/env bash
+prompt() {
+    if [ "\$?" != "0" ]; then
+        local arrow_color=\${bold_red}
+    else
+        local arrow_color=\${reset_color}
+    fi
+    if [ ! -z "\${GITHUB_USER}" ]; then
+        local USERNAME="@\${GITHUB_USER}"
+    else
+        local USERNAME="\\u"
+    fi
+    local cwd="\$(pwd | sed "s|^\${HOME}|~|")"
+    PS1="\${green}\${USERNAME} \${arrow_color}➜\${reset_color} \${bold_blue}\${cwd}\${reset_color} \$(scm_prompt_info)\${white}$ \${reset_color}"
+    
+    # Prepend Python virtual env version to prompt
+    if [[ -n \$VIRTUAL_ENV ]]; then
+        if [ -z "\${VIRTUAL_ENV_DISABLE_PROMPT:-}" ]; then
+            PS1="(\`basename \"\$VIRTUAL_ENV\"\`) \${PS1:-}"
+        fi
+    fi
+}
+SCM_THEME_PROMPT_PREFIX="\${reset_color}\${cyan}(\${bold_red}"
+SCM_THEME_PROMPT_SUFFIX="\${reset_color} "
+SCM_THEME_PROMPT_DIRTY=" \${bold_yellow}✗\${reset_color}\${cyan})"
+SCM_THEME_PROMPT_CLEAN="\${reset_color}\${cyan})"
+SCM_GIT_SHOW_MINIMAL_INFO="true"
+safe_append_prompt_command prompt
+EOF
+)"
+CODESPACES_ZSH="$(cat \
+<<EOF
+prompt() {
+    if [ ! -z "\${GITHUB_USER}" ]; then
+        local USERNAME="@\${GITHUB_USER}"
+    else
+        local USERNAME="%n"
+    fi
+    PROMPT="%{\$fg[green]%}\${USERNAME} %(?:%{\$reset_color%}➜ :%{\$fg_bold[red]%}➜ )"
+    PROMPT+='%{\$fg_bold[blue]%}%~%{\$reset_color%} \$(git_prompt_info)%{\$fg[white]%}$ %{\$reset_color%}'
+}
+ZSH_THEME_GIT_PROMPT_PREFIX="%{\$fg_bold[cyan]%}(%{\$fg_bold[red]%}"
+ZSH_THEME_GIT_PROMPT_SUFFIX="%{\$reset_color%} "
+ZSH_THEME_GIT_PROMPT_DIRTY=" %{\$fg_bold[yellow]%}✗%{\$fg_bold[cyan]%})"
+ZSH_THEME_GIT_PROMPT_CLEAN="%{\$fg_bold[cyan]%})"
+prompt
+EOF
+)"
+
+install-oh-my()
+{
+    local OH_MY=$1
+    local OH_MY_INSTALL_DIR="${USER_RC_PATH}/.oh-my-${OH_MY}"
+    local OH_MY_DOWNLOAD_DIR="/usr/local/oh-my-${OH_MY}"
+    local TEMPLATE="${OH_MY_INSTALL_DIR}/templates/$2"
+    local USER_RC_FILE="${USER_RC_PATH}/.${OH_MY}rc"
+
+    if [ -d "${OH_MY_INSTALL_DIR}" ]; then
+        return 0
+    fi
+
+    if ! [ -d "${OH_MY_DOWNLOAD_DIR}" ]; then
+        return 1
+    fi
+
+    umask g-w,o-w
+    mkdir -p ${OH_MY_INSTALL_DIR}
+    mv ${OH_MY_DOWNLOAD_DIR}/* ${OH_MY_INSTALL_DIR}
+    echo -e "$(cat "${TEMPLATE}")\nDISABLE_AUTO_UPDATE=true\nDISABLE_UPDATE_PROMPT=true" > ${USER_RC_FILE}
+    if [ "${OH_MY}" = "bash" ]; then
+        sed -i -e 's/OSH_THEME=.*/OSH_THEME="codespaces"/g' ${USER_RC_FILE}
+        mkdir -p ${OH_MY_INSTALL_DIR}/custom/themes/codespaces
+        echo "${CODESPACES_BASH}" > ${OH_MY_INSTALL_DIR}/custom/themes/codespaces/codespaces.theme.sh
+    else
+        sed -i -e 's/ZSH_THEME=.*/ZSH_THEME="codespaces"/g' ${USER_RC_FILE}
+        mkdir -p ${OH_MY_INSTALL_DIR}/custom/themes
+        echo "${CODESPACES_ZSH}" > ${OH_MY_INSTALL_DIR}/custom/themes/codespaces.zsh-theme
+    fi
+
+    if [ "${USERNAME}" != "root" ]; then
+        cp -rf ${USER_RC_FILE} ${OH_MY_INSTALL_DIR} /root
+        chown -R ${USERNAME}:${USERNAME} ${USER_RC_PATH}
+    fi
+}
+
+# install-oh-my bash bashrc.osh-template
+install-oh-my zsh zshrc.zsh-template

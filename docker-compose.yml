@@ -1,0 +1,12 @@
+version: "3.7"
+
+services:
+  dev:
+    build: ./base
+    hostname: devcontainer
+    environment: 
+      - PUBLIC_KEY_FILE=/authorized_keys
+    volumes:
+      - ./authorized_keys:/authorized_keys
+    ports:
+      - 2222:2222

@@ -1,0 +1,63 @@
+#!/usr/bin/with-contenv bash
+
+USERNAME=${USERNAME:-"eyhn"}
+
+if [ "${USERNAME}" = "root" ]; then 
+    USERPATH="/root"
+else
+    USERPATH="/home/${USERNAME}"
+fi
+
+# create folders
+mkdir -p \
+    ${USERPATH}/{.ssh,.ssh_host_keys}
+
+# symlink out ssh config directory
+if [ ! -L /etc/ssh ];then
+    if [ ! -f ${USERPATH}/.ssh_host_keys/sshd_config ]; then
+        sed -i "/#PidFile/c\PidFile ${USERPATH}\/.sshd.pid" /etc/ssh/sshd_config
+        sed -i "/^UsePAM/c\UsePAM no" /etc/ssh/sshd_config
+        sed -i "/^PasswordAuthentication/c\PasswordAuthentication no" /etc/ssh/sshd_config
+        cp -a /etc/ssh/sshd_config ${USERPATH}/.ssh_host_keys/
+    fi
+    rm -Rf /etc/ssh
+    ln -s ${USERPATH}/.ssh_host_keys /etc/ssh
+    ssh-keygen -A
+fi
+
+# set umask for sftp
+UMASK=${UMASK:-022}
+sed -i "s|/usr/lib/ssh/sftp-server$|/usr/lib/ssh/sftp-server -u ${UMASK}|g" /etc/ssh/sshd_config
+
+# set key auth in file
+if [ ! -f ${USERPATH}/.ssh/authorized_keys ];then
+    touch ${USERPATH}/.ssh/authorized_keys
+fi
+
+[[ -n "$PUBLIC_KEY" ]] && \
+    [[ ! $(grep "$PUBLIC_KEY" ${USERPATH}/.ssh/authorized_keys) ]] && \
+    echo "$PUBLIC_KEY" >> ${USERPATH}/.ssh/authorized_keys && \
+    echo "Public key from env variable added"
+
+[[ -n "$PUBLIC_KEY_FILE" ]] && [[ -f "$PUBLIC_KEY_FILE" ]] && \
+    PUBLIC_KEY2=$(cat "$PUBLIC_KEY_FILE") && \
+    [[ ! $(grep "$PUBLIC_KEY2" ${USERPATH}/.ssh/authorized_keys) ]] && \
+    echo "$PUBLIC_KEY2" >> ${USERPATH}/.ssh/authorized_keys && \
+    echo "Public key from file added"
+
+if [ -d "$PUBLIC_KEY_DIR" ];then
+    for F in "${PUBLIC_KEY_DIR}"/*;do
+        PUBLIC_KEYN=$(cat "$F") && \
+        [[ ! $(grep "${PUBLIC_KEYN}" ${USERPATH}/.ssh/authorized_keys) ]] && \
+        echo "${PUBLIC_KEYN}" >> ${USERPATH}/.ssh/authorized_keys && \
+        echo "Public key from file '$F' added"
+    done
+fi
+
+chown -R "${USERNAME}":"${USERNAME}" ${USERPATH}/.ssh_host_keys/
+chown -R "${USERNAME}":"${USERNAME}" ${USERPATH}/.ssh/
+
+chmod 700 ${USERPATH}/.ssh
+chmod 600 ${USERPATH}/.ssh/authorized_keys
+
+chown root:root /etc/shadow
