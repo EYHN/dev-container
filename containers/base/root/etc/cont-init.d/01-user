@@ -37,3 +37,7 @@ if [ "${USERNAME}" != "root" ]; then
     echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME
     chmod 0440 /etc/sudoers.d/$USERNAME
 fi
+
+if [ "${USERNAME}" != "root" ]; then
+    chown ${USERNAME}:${USERNAME} "/home/${USERNAME}"
+fi
