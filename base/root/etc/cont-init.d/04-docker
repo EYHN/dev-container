@@ -1,0 +1,7 @@
+#!/usr/bin/with-contenv bash
+
+USERNAME=${USERNAME:-"eyhn"}
+
+if [ "${USERNAME}" != "root" ]; then
+  usermod -aG docker "${USERNAME}"
+fi

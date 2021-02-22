@@ -47,7 +47,9 @@ PACKAGE_LIST="apt-utils \
     sudo \
     ncdu \
     man-db \
-    strace"
+    strace \
+    software-properties-common \
+    gnupg-agent"
 
 # Install libssl1.1 if available
 if [[ ! -z $(apt-cache --names-only search ^libssl1.1$) ]]; then
@@ -68,10 +70,6 @@ fi
 
 echo "Packages to verify are installed: ${PACKAGE_LIST}"
 apt-get -y install --no-install-recommends ${PACKAGE_LIST} 2> >( grep -v 'debconf: delaying package configuration, since apt-utils is not installed' >&2 )
-
-# Get to latest versions of all packages
-apt-get -y upgrade --no-install-recommends
-apt-get autoremove -y
 
 # Ensure at least the en_US.UTF-8 UTF-8 locale is available.
 # Common need for both applications and things like the agnoster ZSH theme.
@@ -119,8 +117,8 @@ download-oh-my()
 download-oh-my bash https://github.com/ohmybash/oh-my-bash
 download-oh-my zsh https://github.com/ohmyzsh/ohmyzsh
 
-
-# install openssh-server
-apt-get install -y openssh-server
+# Get to latest versions of all packages
+apt-get -y upgrade --no-install-recommends
+apt-get autoremove -y
 
 echo "Done!"

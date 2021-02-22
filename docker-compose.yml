@@ -2,11 +2,12 @@ version: "3.7"
 
 services:
   dev:
-    build: ./base
+    image: ghcr.io/eyhn/dev-container-base:latest
     hostname: devcontainer
     environment: 
       - PUBLIC_KEY_FILE=/authorized_keys
     volumes:
       - ./authorized_keys:/authorized_keys
+    privileged: true
     ports:
       - 2222:2222
