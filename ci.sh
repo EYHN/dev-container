@@ -7,7 +7,7 @@ GITHUB_ACTOR=${GITHUB_ACTOR}
 
 echo ${GITHUB_PAT} | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
 
-for module in "base" "ssh" "ssh-dind"; do
+for module in "base" "ssh" "ssh-dind" "nodejs"; do
   if (! $(docker pull ghcr.io/eyhn/dev-container-${module}:latest > /dev/null)); then
     echo "Can't pull old version.";
   fi
