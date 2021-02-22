@@ -1,5 +1,7 @@
 #!/usr/bin/with-contenv bash
 
+set -e
+
 USERNAME=${USERNAME:-"eyhn"}
 
 if [ "${USERNAME}" != "root" ]; then
