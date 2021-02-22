@@ -86,6 +86,7 @@ install-oh-my()
         sed -i -e 's/OSH_THEME=.*/OSH_THEME="codespaces"/g' ${USER_RC_FILE}
         mkdir -p ${OH_MY_INSTALL_DIR}/custom/themes/codespaces
         echo "${CODESPACES_BASH}" > ${OH_MY_INSTALL_DIR}/custom/themes/codespaces/codespaces.theme.sh
+        chmod +x ${OH_MY_INSTALL_DIR}/custom/themes/codespaces/codespaces.theme.sh
     else
         sed -i -e 's/ZSH_THEME=.*/ZSH_THEME="codespaces"/g' ${USER_RC_FILE}
         mkdir -p ${OH_MY_INSTALL_DIR}/custom/themes
