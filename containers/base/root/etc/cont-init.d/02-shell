@@ -102,3 +102,5 @@ install-oh-my()
 
 install-oh-my bash bashrc.osh-template
 install-oh-my zsh zshrc.zsh-template
+
+chsh ${USERNAME} -s /bin/zsh
