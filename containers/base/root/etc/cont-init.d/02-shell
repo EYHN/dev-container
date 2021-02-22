@@ -99,5 +99,5 @@ install-oh-my()
     fi
 }
 
-# install-oh-my bash bashrc.osh-template
+install-oh-my bash bashrc.osh-template
 install-oh-my zsh zshrc.zsh-template
