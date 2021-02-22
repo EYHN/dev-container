@@ -1,1 +1,3 @@
 authorized_keys
+ssh_host_key
+docker-compose.yml

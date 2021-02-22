@@ -11,6 +11,6 @@ for module in "base" "ssh" "ssh-dind"; do
   if (! $(docker pull ghcr.io/eyhn/dev-container-${module}:latest > /dev/null)); then
     echo "Can't pull old version.";
   fi
-  docker build ./${module} --tag ghcr.io/eyhn/dev-container-${module}:latest --cache-from ghcr.io/eyhn/dev-container-${module}:latest
+  docker build ./containers/${module} --tag ghcr.io/eyhn/dev-container-${module}:latest --cache-from ghcr.io/eyhn/dev-container-${module}:latest
   docker push ghcr.io/eyhn/dev-container-${module}:latest
 done

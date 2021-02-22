@@ -92,7 +92,8 @@ install-oh-my()
 
     if [ "${USERNAME}" != "root" ]; then
         cp -rf ${USER_RC_FILE} ${OH_MY_INSTALL_DIR} /root
-        chown -R ${USERNAME}:${USERNAME} ${USER_RC_PATH}
+        chown -R ${USERNAME}:${USERNAME} ${OH_MY_INSTALL_DIR}
+        chown ${USERNAME}:${USERNAME} ${USER_RC_FILE}
     fi
 }
 
