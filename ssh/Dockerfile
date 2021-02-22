@@ -6,5 +6,3 @@ RUN bash /tmp/library-scripts/install-ssh.sh \
     && apt-get clean -y && rm -rf /var/lib/apt/lists/* /tmp/library-scripts
 
 COPY root/ /
-
-ENTRYPOINT ["/init"]
