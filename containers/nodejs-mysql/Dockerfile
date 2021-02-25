@@ -1,4 +1,4 @@
-FROM ghcr.io/eyhn/dev-container-base:latest
+FROM ghcr.io/eyhn/dev-container-nodejs:latest
 
 LABEL org.opencontainers.image.source https://github.com/EYHN/dev-container
 
