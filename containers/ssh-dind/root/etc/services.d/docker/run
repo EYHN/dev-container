@@ -28,4 +28,4 @@ cgroupfs_mount() {
 cgroupfs_mount
 
 exec 2>&1 \
-        /usr/bin/dockerd -p /var/run/docker.pid
+        /usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock -p /var/run/docker.pid
